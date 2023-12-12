@@ -1,5 +1,5 @@
 import pandas as pd
-import json 
+import json
 
 if __name__ == "__main__":
     pass
@@ -9,12 +9,11 @@ resultat = "resultat.txt" #fichier resultat
 
 appli_perimetre = [] #tableau contenant les applications du périmètre 
 
-
-# Fonction permettant de récupérer les serveurs issus du périmètre donnée 
-def Appli(data_p, perimetre):
+# Fonction permettant de récupérer les applications ayant comme code CIA celui recherché
+def Appli(data_p, CIA):
     for application in data_p:
-        if application["name_department"] == perimetre:
-            appli_perimetre.append(application["cia"]) 
+        if application["cia"] == CIA:
+            appli_perimetre.append(application["cia"])
 
 # Fonction permettant de comparé les variables entre elles 
 def Verif(data_s, present):
@@ -23,7 +22,7 @@ def Verif(data_s, present):
         cia = serveur["cia"]
         cia_bt = serveur["cia_bt"]
         for ligne in nomServ['serveur']:    #serveur test 
-            serveur_trouve = False
+            serveur_trouve = False 
             if nom == ligne:
                 if cia_bt == None :
                     if cia == None:
@@ -34,7 +33,7 @@ def Verif(data_s, present):
                             if cia == cia_p:
                                 present.append(f"{ligne} -- Appli :  " + cia)
                                 serveur_trouve = True
-                                break     
+                                break
                 else : 
                     for cia_p in appli_perimetre: # les cia de notre permitre      
                             if cia_bt == cia_p:
@@ -43,20 +42,20 @@ def Verif(data_s, present):
                                 break                            
                 if serveur_trouve == False:
                     pass
-
-def Write(present , perimetre):
+        
+def Write(present , CIA):
     with open(resultat, 'w') as fichier:
-        fichier.write("     Voici la liste des serveurs présent dans le périmètre :" + perimetre + "\n \n \n")
+        fichier.write("     Voici la liste des serveur ayant comme code CIA : " + CIA + "\n \n \n")
         for serveur in present:
             fichier.write(serveur + "\n")
 
-def LaunchP(perimetre):
+def LaunchC(CIA):
     with open ("info_api_p.json", 'r') as api_p:
         data_p = json.load(api_p)
 
     with open ("info_api_s.json", 'r') as api_s:
         data_s = json.load(api_s)
     present = [] # tableau contenant les serveur présent dans notre périmètre
-    Appli(data_p ,perimetre)
+    Appli(data_p, CIA)
     Verif(data_s, present)
-    Write(present , perimetre)
+    Write(present , CIA)
