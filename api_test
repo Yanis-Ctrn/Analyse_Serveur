@@ -6,16 +6,22 @@ import re
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
+if __name__ == "__main__":
+    pass
+
 def extract_json_objects(text):
     # Utilise une expression régulière pour trouver des objets JSON entre {}
     pattern = r'\{[^{}]*\}'
     return re.findall(pattern, text)
 
 def stream_to_file(url, file_name, auth):
+    debut = True
+    fin = False
     with requests.get(url, auth=auth, stream=True, verify=False) as r:
         r.raise_for_status()
 
         with open(file_name, 'w') as file:
+            file.write("[")
             current_chunk = ''
             
             for chunk in r.iter_content(chunk_size=8192, decode_unicode=True):
@@ -24,18 +30,22 @@ def stream_to_file(url, file_name, auth):
                 objects = extract_json_objects(current_chunk)
                 for obj in objects:
                     # Copiez chaque objet JSON en entier dans le fichier
-                    file.write(json.loads(obj) + "\n")
+                    file.write(obj + "\n,")
                 # Réinitialisez le chunk pour le prochain tour de boucle
                 current_chunk = ''
+            debut = False
+            fin = True
+            if fin == True : 
+                file.write("]") 
 
-if __name__ == "__main__":
+def Update():
     username = 'catarinoya'
     password = 'QBVMaq237!.bmzW.yctv'
     url_perimetre = "https://cockpit.intranatixis.com/query/api/json/174"
     url_serveur = "https://cockpit.intranatixis.com/query/api/json/260"
     
+    print("0")
     stream_to_file(url_perimetre, "info_api_p.json", (username, password))
-    stream_to_file(url_serveur, "info_api_s.json", (username, password))
     print("1")
-
-
+    stream_to_file(url_serveur, "info_api_s.json", (username, password))
+    print("2")
