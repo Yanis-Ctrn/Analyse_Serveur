@@ -7,13 +7,13 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 def stream_to_file(url, file_name, auth):
     with requests.get(url, auth=auth, stream=True, verify=False) as r:
         r.raise_for_status()
-
+        
         with open(file_name, 'w') as file:
             obj_depth = 0
             current_obj = ''
+            object_list = []  # Une liste pour stocker les objets JSON formatés
             
-            # Utilisez un chunk size plus petit
-            for chunk in r.iter_content(chunk_size=128, decode_unicode=True): 
+            for chunk in r.iter_content(chunk_size=8192, decode_unicode=True):
                 for char in chunk:
                     current_obj += char
                     if char == '{':
@@ -24,10 +24,14 @@ def stream_to_file(url, file_name, auth):
                         if obj_depth == 0:
                             try:
                                 json_object = json.loads(current_obj)
-                                file.write(json.dumps(json_object) + "\n") # Ajouter un saut de ligne pour chaque objet JSON
+                                object_list.append(json_object)  # Ajouter l'objet JSON à la liste
                                 current_obj = ''  # Réinitialiser pour le prochain objet JSON
                             except json.JSONDecodeError:
                                 pass  # Gérer l'erreur de décodage
+            
+            # Une fois que tous les objets ont été lus, formatez-les au format souhaité et écrivez-les dans le fichier
+            formatted_objects = json.dumps(object_list, indent=4)  # Indentation pour une meilleure lisibilité
+            file.write(formatted_objects)
 
 if __name__ == "__main__":
     username = 'catarinoya'
@@ -38,3 +42,4 @@ if __name__ == "__main__":
     stream_to_file(url_perimetre, "info_api_p.json", (username, password))
     stream_to_file(url_serveur, "info_api_s.json", (username, password))
     print("1")
+
