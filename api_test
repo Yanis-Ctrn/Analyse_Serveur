@@ -10,8 +10,9 @@ if __name__ == "__main__":
     pass
 
 def extract_json_objects(text):
-    # Utilise une expression régulière pour trouver des objets JSON entre {}
-    pattern = r'\{[^{}]*\}'
+    # Utilise une expression régulière pour trouver des objets JSON entre {},
+    # en ignorant les {} entre guillemets
+    pattern = r'\{(?:[^{}"]|"(?:\\.|[^"\\])*")*\}'
     return re.findall(pattern, text)
 
 def stream_to_file(url, file_name, auth):
@@ -49,3 +50,4 @@ def Update():
     print("1")
     stream_to_file(url_serveur, "info_api_s.json", (username, password))
     print("2")
+
