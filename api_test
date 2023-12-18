@@ -2,11 +2,12 @@ import json
 import requests
 from requests.auth import HTTPDigestAuth
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-
-# Supprimer cette partie si vous avez un certificat valide
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-def process_json_stream(url, auth):
+if __name__ == "__main__":
+    pass
+
+def stream_to_file(url, file_name, auth):
     with requests.get(url, auth=auth, stream=True, verify=False) as r:
         r.raise_for_status()
 
@@ -23,20 +24,24 @@ def process_json_stream(url, auth):
                 if obj_depth == 0:
                     # Un objet JSON complet a été lu
                     try:
-                        data = json.loads(current_obj)
-                        # Traitez l'objet JSON ici
-                        print(data)  # Ou écrivez-le dans un fichier, etc.
+                        with open(file_name,'w') as file:
+                            file.write(json.loads(current_obj))                       
                     except json.JSONDecodeError:
                         # Gérer une éventuelle erreur de décodage
                         pass
 
                     current_obj = ''  # Réinitialiser pour le prochain objet JSON
+        
 
-def main():
-    username = 'catarinoya'
-    password = 'QBVMaq237!.bmzW.yctv'
-    url = "https://cockpit.intranatixis.com/query/api/json/174"
-    process_json_stream(url, (username, password))
 
-if __name__ == "__main__":
-    main()
+username = 'catarinoya'
+password = 'QBVMaq237!.bmzW.yctv'
+
+url_serveur = "https://cockpit.intranatixis.com/query/api/json/260" #Url de l'api permettant la récupération des périmètre et leur application 
+url_perimetre = "https://cockpit.intranatixis.com/query/api/json/174" #Url de l'api permettant la récupération des périmètre et leur application 
+
+stream_to_file(url_perimetre, "info_api_p.json", (username, password)) #récupètre la liste des périmètres ainsi que les applications qu'ils gèrent
+stream_to_file(url_serveur, "info_api_s.json", (username, password)) #récupètre la liste des serveurs connu avec leurs code IUA
+print("1")
+
+
