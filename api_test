@@ -4,44 +4,37 @@ from requests.auth import HTTPDigestAuth
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-if __name__ == "__main__":
-    pass
-
 def stream_to_file(url, file_name, auth):
     with requests.get(url, auth=auth, stream=True, verify=False) as r:
         r.raise_for_status()
 
-        obj_depth = 0
-        current_obj = ''
+        with open(file_name, 'w') as file:
+            obj_depth = 0
+            current_obj = ''
+            
+            # Utilisez un chunk size plus petit
+            for chunk in r.iter_content(chunk_size=128, decode_unicode=True): 
+                for char in chunk:
+                    current_obj += char
+                    if char == '{':
+                        obj_depth += 1
+                    elif char == '}':
+                        obj_depth -= 1
 
-        for chunk in r.iter_content(chunk_size=1, decode_unicode=True):
-            current_obj += chunk
-            if chunk == '{':
-                obj_depth += 1
-            elif chunk == '}':
-                obj_depth -= 1
+                        if obj_depth == 0:
+                            try:
+                                json_object = json.loads(current_obj)
+                                file.write(json.dumps(json_object) + "\n") # Ajouter un saut de ligne pour chaque objet JSON
+                                current_obj = ''  # Réinitialiser pour le prochain objet JSON
+                            except json.JSONDecodeError:
+                                pass  # Gérer l'erreur de décodage
 
-                if obj_depth == 0:
-                    # Un objet JSON complet a été lu
-                    try:
-                        with open(file_name,'w') as file:
-                            file.write(json.loads(current_obj))                       
-                    except json.JSONDecodeError:
-                        # Gérer une éventuelle erreur de décodage
-                        pass
-
-                    current_obj = ''  # Réinitialiser pour le prochain objet JSON
-        
-
-
-username = 'catarinoya'
-password = 'QBVMaq237!.bmzW.yctv'
-
-url_serveur = "https://cockpit.intranatixis.com/query/api/json/260" #Url de l'api permettant la récupération des périmètre et leur application 
-url_perimetre = "https://cockpit.intranatixis.com/query/api/json/174" #Url de l'api permettant la récupération des périmètre et leur application 
-
-stream_to_file(url_perimetre, "info_api_p.json", (username, password)) #récupètre la liste des périmètres ainsi que les applications qu'ils gèrent
-stream_to_file(url_serveur, "info_api_s.json", (username, password)) #récupètre la liste des serveurs connu avec leurs code IUA
-print("1")
-
-
+if __name__ == "__main__":
+    username = 'catarinoya'
+    password = 'QBVMaq237!.bmzW.yctv'
+    url_perimetre = "https://cockpit.intranatixis.com/query/api/json/174"
+    url_serveur = "https://cockpit.intranatixis.com/query/api/json/260"
+    
+    stream_to_file(url_perimetre, "info_api_p.json", (username, password))
+    stream_to_file(url_serveur, "info_api_s.json", (username, password))
+    print("1")
