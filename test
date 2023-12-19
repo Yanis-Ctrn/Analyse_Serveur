@@ -1,0 +1,38 @@
+# Fonction permettant de comparé les variables entre elles 
+def Verif(data_s, present):
+    for serveur in data_s:   
+        nom = serveur["serveur"]
+        application = serveur["application"]
+        cia = serveur["cia"]
+        cia_bt = serveur["cia_bt"]
+        for ligne in nomServ['serveur']:    #serveur test 
+            serveur_trouve = False
+            if nom == ligne:
+                if cia_bt == None :
+                    if cia == None:
+                        serveur_trouve = True
+                        pass
+                    else :
+                        for cia_p in appli_perimetre: # les cia de notre permitre      
+                            if cia == cia_p:
+                                present.append(ligne + application + cia )
+                                serveur_trouve = True
+                                pass     
+                else : 
+                    for cia_p in appli_perimetre: # les cia de notre permitre      
+                            if cia_bt == cia_p:
+                                present.append(ligne + application + cia_bt)
+                                serveur_trouve = True
+                                pass                            
+                if serveur_trouve == False:
+                    pass
+
+def Write(present):
+    # Séparer les noms des serveurs et des applications
+    data = [entry.split(' -- Appli :  ') for entry in present]
+    
+    # Créer un DataFrame à partir des données séparées
+    df = pd.DataFrame(data, columns=['Serveur', 'Application'])
+    
+    # Écrire le DataFrame dans un fichier CSV
+    df.to_csv('resultat.csv', index=False)
