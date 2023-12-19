@@ -5,7 +5,6 @@ if __name__ == "__main__":
     pass
 
 nomServ = pd.read_csv("serveurs.csv",encoding='latin-1').drop_duplicates() #récupère les serveurs que l'on souhaite testé en supprimant les doublons s'il y en a 
-resultat = "resultat.txt" #fichier resultat
 
 appli_perimetre = [] #tableau contenant les applications du périmètre 
 
@@ -39,23 +38,30 @@ def Verif(data_s, present):
                             if cia_bt == cia_p:
                                 present.append(f"{ligne} -- Appli :  " + cia_bt)
                                 serveur_trouve = True
+                                print("1")
                                 break                            
                 if serveur_trouve == False:
                     pass
 
-def Write(present , perimetre):
-    with open(resultat, 'w') as fichier:
-        fichier.write("     Voici la liste des serveurs present dans le perimetre :" + perimetre + "\n \n \n")
-        for serveur in present:
-            fichier.write(serveur + "\n")
+def Write(present):
+    # Séparer les noms des serveurs et des applications
+    data = [entry.split(' -- Appli :  ') for entry in present]
+    
+    # Créer un DataFrame à partir des données séparées
+    df = pd.DataFrame(data, columns=['Serveur', 'Application'])
+    
+    # Écrire le DataFrame dans un fichier CSV
+    df.to_csv('resultat.csv', index=False)
 
 def LaunchP(perimetre):
-    with open ("info_api_p.json", 'r') as api_p:
+    with open ("data/info_api_p.json", 'r') as api_p:
         data_p = json.load(api_p)
 
-    with open ("info_api_s.json", 'r') as api_s:
+    with open ("data/info_api_s.json", 'r') as api_s:
         data_s = json.load(api_s)
     present = [] # tableau contenant les serveur présent dans notre périmètre
     Appli(data_p ,perimetre)
     Verif(data_s, present)
-    Write(present , perimetre)
+    Write(present)
+
+
